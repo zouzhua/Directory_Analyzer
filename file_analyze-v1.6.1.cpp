@@ -30,7 +30,7 @@ typedef struct Node {
 bool is_find = false, is_find_child = false;
 
 //遍历文件夹(DFS)
-void GetFiles(string path, Tree file) {
+void Get_File_Tree(string path, Tree file) {
     long hFile = 0;              //文件句柄
     struct _finddata_t fileinfo; //文件信息结构体
     string p;                    //字符串，存放路径
@@ -53,7 +53,7 @@ void GetFiles(string path, Tree file) {
                     file->child==NULL?file->child=newNode:last->brother=newNode;
                     last=newNode;
                     /*遍历下一层文件夹和文件(p.assign(path).append("\\").append(fileinfo.name)是绝对路径)*/
-                    GetFiles(p.assign(path).append("\\").append(fileinfo.name), newNode);
+                    Get_File_Tree(p.assign(path).append("\\").append(fileinfo.name), newNode);
                     /*加上path子文件夹(即此文件夹)的大小*/
                     file->size += newNode->size;
                 }
@@ -161,6 +161,10 @@ void Display_Result(Tree tree, string path_now) {
     cout << endl;
 }
 
+void Delete_File(Tree tree,string path){
+
+}
+
 int main() {
     string file_path = "D:";
 
@@ -171,7 +175,7 @@ int main() {
 
     cout<<"开始运行..."<<endl;
     int start_time=clock();
-    GetFiles(file_path, file);
+    Get_File_Tree(file_path, file);
     int end_time=clock();
     cout << "完成搜索( " <<end_time-start_time<<"ms )"<< endl;
 
