@@ -177,23 +177,24 @@ void Adjust_FileTree(Tree tree,string path,long long size){
     while(node_temp){
         if(node_temp->name==path_dir) {
             if(p==-1){
-                if(last==node_temp)
+                if(last==tree->child)
                     tree->child=node_temp->brother;
                 else
                     last->brother=tree->brother;
-                break;
+                return;
             }
             node_temp->size -= size;
-                Adjust_FileTree(node_temp,path.substr(p+1),size);
-            break;
+            Adjust_FileTree(node_temp,path.substr(p+1),size);
+            return;
         }
+        last=node_temp;
         node_temp=node_temp->brother;
     }
 }
 
-void Delete(Tree tree,string name,string path){
+void Delete(Tree tree,string path,string path_verify){
     /*先判断需要删除的文件或文件夹是否存在*/
-    if(_access(path.c_str(),0)==-1) {
+    if(_access(path_verify.c_str(),0)==-1) {
         cout<<"文件(文件夹)不存在"<<endl;
         return;
     }
@@ -204,20 +205,21 @@ void Delete(Tree tree,string name,string path){
         return;
     }
     /*获取需要删除的文件夹的大小*/
-    Tree tree_delete=Find_Dir_Addr(tree,path);
-    long long size_delete=tree_delete->size;
+    Tree tree_delete=Find_Dir_Addr(tree,path_verify);
+
     cout<<tree_delete->name<<" "<<tree_delete->size<<endl;
-    cout<<"是否确认删除(y/n):";
-    char cmd;cin>>cmd;
-    if(cmd=='y'||cmd=='Y'){
+
+    //cout<<"confirm again(y/n):";
+    //char cmd;cin>>cmd;
+    //if(cmd=='y'||cmd=='Y'){
         //产出文件夹(DFS)
         //Delete_Dir()
         //调整文件树大小
-        cout<<"调整文件数..."<<endl;
+        cout<<"adjusting the file tree..."<<endl;
         tree->size-=tree_delete->size;
         Adjust_FileTree(tree,path,tree_delete->size);
-        cout<<"调整文件数完成"<<endl;
-    }
+        cout<<"finished the file tree"<<endl;
+    //}
 }
 
 int main() {
@@ -228,11 +230,11 @@ int main() {
     file->name = file_path;
     file->size = 0;
 
-    cout<<"开始运行..."<<endl;
+    cout<<"starting..."<<endl;
     int start_time=clock();
     Get_File_Tree(file_path, file);
     int end_time=clock();
-    cout << "完成搜索( " <<end_time-start_time<<"ms )"<< endl;
+    cout << "finished ( " <<end_time-start_time<<"ms )"<< endl;
 
     /*测试 输入:一个路径 输出:路径内文件夹的大小*/
     string path_input = "", path_log;
@@ -241,15 +243,15 @@ int main() {
             path_input = path_log + "\\" + path_input.substr(2);
         else if(path_input[0]=='r'&&path_input[1]=='m'){
             path_input = path_input.substr(3);//输入格式比如:rm_文件/文件夹名绝对路径
-            cout << "删除文件(文件夹):"<<path_input << endl;
+            cout << "rm_file(dir):"<<path_input << endl;
             int i;
-            for(i=0;i>=path_input.length()||i>=file_path.length();i++){
+            for(i=0;i<=path_input.length()||i<=file_path.length();i++){
                 if(path_input[i]!=file_path[i])
                     break;
             }
             i=(path_input[i+1]=='\\')?i+2:i+1;
             path_input=path_input.substr(i);
-            Delete(file, path_input, path_log + "\\" + path_input);
+            Delete(file, path_input,file_path+"\\"+path_input);
             continue;
         }
         Tree node_temp = Find_Dir_Addr(file, path_input);
